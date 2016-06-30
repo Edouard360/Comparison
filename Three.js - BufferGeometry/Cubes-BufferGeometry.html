@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - geometry hierarchy</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<canvas id="my_canvas"></canvas>
+		
+	</head>
+	<body>
+
+		<script type="text/javascript" src="../CONSTANTES.js"></script>
+		<script src="js/stats.min.js"></script>
+		<script src="js/three.js"></script>
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec3 fragNormal;
+
+			void main(void) { //pre-built function\n\
+				gl_Position = projectionMatrix * modelViewMatrix*vec4(position, 1.);
+				fragNormal = normal;
+			}		
+
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentShader">
+			varying vec3 fragNormal;
+			void main(void) {
+				gl_FragColor = vec4(0,0,0, 1.);
+			}
+		</script>
+
+		<script>
+
+			var container, stats;
+
+			var camera, scene, renderer;
+
+			var geometry, group;
+
+			var mouseX = 0, mouseY = 0;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+
+			mesh = initscene();
+			animate();
+			
+
+
+			function initscene() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 5 );
+
+				helper = new THREE.CameraHelper(camera);
+				// 60 is vertical field of view
+				// Doesn't accept 0 or negative NUMBERs
+				//camera = new THREE.OrthographicCamera(-1,1,-1,1,0.1,5);
+				camera.position.x = POSITION_CAMERA.x;
+				camera.position.z = POSITION_CAMERA.y;
+				camera.position.y = POSITION_CAMERA.z;
+
+				scene = new THREE.Scene();
+				scene.position.x = 0;
+				scene.position.y = 0;
+				scene.position.z = 0;
+
+				var geometry = new THREE.BufferGeometry();
+
+				var cubesVerts = [];
+				var cubesNormals = [];
+				var cubesIndices = [];
+
+				function appendCube (x, y, z,size) {
+
+					var size = size;
+					// Bottom
+					var idx = cubesVerts.length / 3.0;
+					cubesIndices.push(idx, idx + 2, idx + 1);
+					cubesIndices.push(idx, idx + 3, idx + 2);
+
+					cubesNormals.push(0.,-1.,0.);
+					cubesNormals.push(0.,-1.,0.);
+					cubesNormals.push(0.,-1.,0.);
+					cubesNormals.push(0.,-1.,0.);
+
+					cubesVerts.push(x - size, y - size, z - size);
+					cubesVerts.push(x + size, y - size, z - size);
+					cubesVerts.push(x + size, y - size, z + size);
+					cubesVerts.push(x - size, y - size, z + size);
+
+					// Top
+					idx = cubesVerts.length / 3.0;
+					cubesIndices.push(idx, idx + 1, idx + 2);
+					cubesIndices.push(idx, idx + 2, idx + 3);
+
+					cubesNormals.push(0.,1.,0.);
+					cubesNormals.push(0.,1.,0.);
+					cubesNormals.push(0.,1.,0.);
+					cubesNormals.push(0.,1.,0.);
+
+					cubesVerts.push(x - size, y + size, z - size);
+					cubesVerts.push(x + size, y + size, z - size);
+					cubesVerts.push(x + size, y + size, z + size);
+					cubesVerts.push(x - size, y + size, z + size);
+
+					// Left
+					idx = cubesVerts.length / 3.0;
+					cubesIndices.push(idx, idx + 1, idx + 2);
+					cubesIndices.push(idx, idx + 2, idx + 3);
+
+					cubesNormals.push(-1.,0.,0.);
+					cubesNormals.push(-1.,0.,0.);
+					cubesNormals.push(-1.,0.,0.);
+					cubesNormals.push(-1.,0.,0.);
+
+					cubesVerts.push(x - size, y - size, z - size);
+					cubesVerts.push(x - size, y + size, z - size);
+					cubesVerts.push(x - size, y + size, z + size);
+					cubesVerts.push(x - size, y - size, z + size);
+
+					// Right
+					idx = cubesVerts.length / 3.0;
+					cubesIndices.push(idx, idx + 2, idx + 1);
+					cubesIndices.push(idx, idx + 3, idx + 2);
+
+					cubesNormals.push(1.,0.,0.);
+					cubesNormals.push(1.,0.,0.);
+					cubesNormals.push(1.,0.,0.);
+					cubesNormals.push(1.,0.,0.);
+
+					cubesVerts.push(x + size, y - size, z - size);
+					cubesVerts.push(x + size, y + size, z - size);
+					cubesVerts.push(x + size, y + size, z + size);
+					cubesVerts.push(x + size, y - size, z + size);
+
+					// Back
+					idx = cubesVerts.length / 3.0;
+					cubesIndices.push(idx, idx + 1, idx + 2);
+					cubesIndices.push(idx, idx + 2, idx + 3);
+
+					cubesNormals.push(0.,0.,-1.);
+					cubesNormals.push(0.,0.,-1.);
+					cubesNormals.push(0.,0.,-1.);
+					cubesNormals.push(0.,0.,-1.);
+
+					cubesVerts.push(x - size, y - size, z - size);
+					cubesVerts.push(x + size, y - size, z - size);
+					cubesVerts.push(x + size, y + size, z - size);
+					cubesVerts.push(x - size, y + size, z - size);
+
+					// Front
+					idx = cubesVerts.length / 3.0;
+					cubesIndices.push(idx, idx + 2, idx + 1);
+					cubesIndices.push(idx, idx + 3, idx + 2);
+
+					cubesNormals.push(0.,0.,1.);
+					cubesNormals.push(0.,0.,1.);
+					cubesNormals.push(0.,0.,1.);
+					cubesNormals.push(0.,0.,1.);
+
+					cubesVerts.push(x - size, y - size, z + size);
+					cubesVerts.push(x + size, y - size, z + size);
+					cubesVerts.push(x + size, y + size, z + size);
+					cubesVerts.push(x - size, y + size, z + size);
+				}
+
+				for ( var i = 0; i < NUMBER; i ++ ) {
+					if(DEBUG){
+						abscisse = {x:(i/NUMBER),y:(i/NUMBER),z:(i/NUMBER)};
+					}else{
+						abscisse = {x:Math.random(),y:Math.random(),z:Math.random()};
+					}
+					appendCube(SIZE_CONTAINER*(2*abscisse.x-1),SIZE_CONTAINER*(2*abscisse.y-1),SIZE_CONTAINER*(2*abscisse.z-1), SIZE_SQUARES/2);
+				}
+
+				geometry.attributes = {
+					position:{
+						itemSize: 3,
+						array: new Float32Array(cubesVerts),
+						numItems: cubesVerts.length
+					},
+					normal:{
+						itemSize:3,
+						array: new Float32Array(cubesNormals),
+						numItems: cubesNormals.length
+					},
+					uniforms:{},
+				}
+
+				geometry.setIndex( new THREE.BufferAttribute( new Uint32Array(cubesIndices), 1 ) );
+
+				var material = new THREE.ShaderMaterial( {
+					vertexShader:   document.getElementById( 'vertexShader' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+					morphNormals: true,
+					shading: THREE.FlatShading
+				});
+
+				mesh = new THREE.Mesh(geometry, material);
+				mesh.position.set(0,0,0);
+				scene.add( mesh );
+
+				
+				if(DEBUG){
+					var axisHelper = new THREE.AxisHelper( 5 );
+					scene.add( axisHelper );
+				}
+				
+				renderer = new THREE.WebGLRenderer({canvas:document.getElementById("my_canvas")});
+				renderer.setClearColor( 0xFFFFFF );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.sortObjects = false;
+
+				container.appendChild( renderer.domElement );
+
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+				return mesh;
+
+			}
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			var ref = 0;
+			camera.lookAt( POINT_TO_LOOK_AT );
+
+			function animate(time) {
+				var dt = time - ref;
+				ref =time;
+
+				mesh.rotation.x += VITESSE_ROTATION.x;
+				mesh.rotation.y += VITESSE_ROTATION.y;
+				mesh.rotation.z += VITESSE_ROTATION.z;
+
+				requestAnimationFrame( animate );
+				renderer.render( scene, camera );
+
+				stats.update();
+
+			}
+
+		</script>
+
+	</body>
+</html>

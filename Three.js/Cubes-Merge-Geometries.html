@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - geometry hierarchy</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+	</head>
+	<body>
+
+		<script type="text/javascript" src="../CONSTANTES.js"></script>
+		<script src="js/stats.min.js"></script>
+		<script src="js/three.js"></script>
+
+		<script>
+
+			var container, stats;
+
+			var camera, scene, renderer;
+
+			var geometry, group;
+
+			var mouseX = 0, mouseY = 0;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+
+			mesh = initscene();
+			animate();
+			
+
+
+			function initscene() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 5 );
+
+				helper = new THREE.CameraHelper(camera);
+				// 60 is vertical field of view
+				// Doesn't accept 0 or negative NUMBERs
+				//camera = new THREE.OrthographicCamera(-1,1,-1,1,0.1,5);
+				camera.position.x = POSITION_CAMERA.x;
+				camera.position.z = POSITION_CAMERA.y;
+				camera.position.y = POSITION_CAMERA.z;
+
+				scene = new THREE.Scene();
+				scene.position.x = 0;
+				scene.position.y = 0;
+				scene.position.z = 0;
+
+				var geometry = new THREE.BoxGeometry(SIZE_SQUARES, SIZE_SQUARES, SIZE_SQUARES);
+				var material = new THREE.MeshBasicMaterial({color:0x000000});
+
+				meshes = [];
+
+				
+
+				for ( var i = 0; i < NUMBER; i ++ ) {
+					if(DEBUG){
+            			abscisse = {x:(i/NUMBER),y:(i/NUMBER),z:(i/NUMBER)};
+       				}else{
+            			abscisse = {x:Math.random(),y:Math.random(),z:Math.random()};
+        			}
+
+					var mesh = new THREE.Mesh( geometry, material );
+					mesh.position.x = (2*abscisse.x-1)*SIZE_CONTAINER;
+					mesh.position.y =(2*abscisse.y-1)*SIZE_CONTAINER;
+					mesh.position.z = (2*abscisse.z-1)*SIZE_CONTAINER;
+
+					mesh.matrixAutoUpdate = false;
+					mesh.updateMatrix();
+
+					meshes.push( mesh );
+
+				}
+
+				var combined = new THREE.Geometry();
+				for(var i =0;i<meshes.length;i++){
+					combined.merge(meshes[i].geometry,meshes[i].matrix);
+				}
+
+
+				mesh = new THREE.Mesh(combined, material);
+				scene.add( mesh );
+				
+				if(DEBUG){
+					var axisHelper = new THREE.AxisHelper( 5 );
+					scene.add( axisHelper );
+				}
+				
+				
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setClearColor( 0xFFFFFF );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.sortObjects = false;
+
+				container.appendChild( renderer.domElement );
+
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+				return mesh;
+
+			}
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			var ref = 0;
+
+			function animate(time) {
+				var dt = time - ref;
+				ref =time;
+
+
+				mesh.rotation.x += VITESSE_ROTATION.x;
+				mesh.rotation.y += VITESSE_ROTATION.y;
+				mesh.rotation.z += VITESSE_ROTATION.z;
+
+				requestAnimationFrame( animate );
+
+				camera.lookAt( POINT_TO_LOOK_AT );
+				//camera.lookAt( scene.position );
+				
+				//camera.position.z = Math.sin(ref*0.02);
+				//camera.position.x = Math.cos(ref*0.02);
+
+				renderer.render( scene, camera );
+
+				stats.update();
+
+			}
+
+		</script>
+
+	</body>
+</html>
