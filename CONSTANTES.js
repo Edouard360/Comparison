@@ -1,11 +1,10 @@
-NUMBER = 300000;
-POSITION_CAMERA = {x:0,y:0.7,z:0.7};
-POINT_TO_LOOK_AT = {x:0,y:0,z:0};
-SIZE_SQUARES = 0.006;
+NUMBER = 1;
+POSITION_CAMERA = {x:1.,y:.5,z:1.5};
+POINT_TO_LOOK_AT = {x:0,y:0.,z:0};
+SIZE_SQUARES = 0.3;
 SIZE_CONTAINER = 0.2;
-VITESSE_ROTATION = {x:0.01,y:0.,z:0.}
+VITESSE_ROTATION = {x:0.0,y:0.0,z:0.}
 
-
-DEBUG = false;
+DEBUG = true;
 
 

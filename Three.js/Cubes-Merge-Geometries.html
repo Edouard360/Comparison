@@ -6,7 +6,7 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		
 	</head>
-	<body>
+	<body style="overflow:hidden">
 
 		<script type="text/javascript" src="../CONSTANTES.js"></script>
 		<script src="js/stats.min.js"></script>
@@ -25,13 +25,57 @@
 			var windowHalfX = window.innerWidth / 2;
 			var windowHalfY = window.innerHeight / 2;
 
+			var loader = new THREE.TextureLoader();
+			loader.load('../Colors.png', function(texture){
+				texture.minFilter = THREE.NearestFilter;
+				texture.magFilter = THREE.NearestFilter;
+				var material = new THREE.MeshBasicMaterial({map:texture});
+				mesh = initscene(material);
 
-			mesh = initscene();
-			animate();
-			
+				animate();
+			});
+
+			var palette = {
+				yellow : [
+					new THREE.Vector2(0,0),
+					new THREE.Vector2(0,0.33),
+					new THREE.Vector2(0.5,0.33),
+					new THREE.Vector2(0.5,0)
+				],
+				purple: [
+					new THREE.Vector2(0.5,0),
+					new THREE.Vector2(0.5,0.33),
+					new THREE.Vector2(1,0.33),
+					new THREE.Vector2(1,0)
+				],
+				indigo: [
+					new THREE.Vector2(0,0.33),
+					new THREE.Vector2(0,0.66),
+					new THREE.Vector2(0.5,0.66),
+					new THREE.Vector2(0.5,0.33)
+				],
+				blue: [
+					new THREE.Vector2(0.5,0.33),
+					new THREE.Vector2(0.5,0.66),
+					new THREE.Vector2(1,0.66),
+					new THREE.Vector2(1,0.33)
+				],
+				red: [
+					new THREE.Vector2(0,0.66),
+					new THREE.Vector2(0,1),
+					new THREE.Vector2(0.5,1),
+					new THREE.Vector2(0.5,0.66)
+				],
+				green: [
+					new THREE.Vector2(0.5,0.66),
+					new THREE.Vector2(0.5,1),
+					new THREE.Vector2(1,1),
+					new THREE.Vector2(1,0.66)
+				]
+			}
 
 
-			function initscene() {
+			function initscene(material) {
 
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
@@ -43,8 +87,8 @@
 				// Doesn't accept 0 or negative NUMBERs
 				//camera = new THREE.OrthographicCamera(-1,1,-1,1,0.1,5);
 				camera.position.x = POSITION_CAMERA.x;
-				camera.position.z = POSITION_CAMERA.y;
-				camera.position.y = POSITION_CAMERA.z;
+				camera.position.y = POSITION_CAMERA.y;
+				camera.position.z = POSITION_CAMERA.z;
 
 				scene = new THREE.Scene();
 				scene.position.x = 0;
@@ -52,7 +96,29 @@
 				scene.position.z = 0;
 
 				var geometry = new THREE.BoxGeometry(SIZE_SQUARES, SIZE_SQUARES, SIZE_SQUARES);
-				var material = new THREE.MeshBasicMaterial({color:0x000000});
+				
+				initUvs(geometry);
+
+				function initUvs(geometry){
+					geometry.faceVertexUvs[0] = [];
+					geometry.faceVertexUvs[0][0] = [palette.red[0],palette.red[1],palette.red[3]];
+					geometry.faceVertexUvs[0][1] = [palette.red[1],palette.red[2],palette.red[3]];
+
+					geometry.faceVertexUvs[0][2] = [palette.indigo[0],palette.indigo[1],palette.indigo[3]];
+					geometry.faceVertexUvs[0][3] = [palette.indigo[1],palette.indigo[2],palette.indigo[3]];
+
+					geometry.faceVertexUvs[0][4] = [palette.green[0],palette.green[1],palette.green[3]];
+					geometry.faceVertexUvs[0][5] = [palette.green[1],palette.green[2],palette.green[3]];
+
+					geometry.faceVertexUvs[0][6] = [palette.yellow[0],palette.yellow[1],palette.yellow[3]];
+					geometry.faceVertexUvs[0][7] = [palette.yellow[1],palette.yellow[2],palette.yellow[3]];
+
+					geometry.faceVertexUvs[0][8] = [palette.blue[0],palette.blue[1],palette.blue[3]];
+					geometry.faceVertexUvs[0][9] = [palette.blue[1],palette.blue[2],palette.blue[3]];
+
+					geometry.faceVertexUvs[0][10] = [palette.purple[0],palette.purple[1],palette.purple[3]];
+					geometry.faceVertexUvs[0][11] = [palette.purple[1],palette.purple[2],palette.purple[3]];
+				}
 
 				meshes = [];
 
@@ -66,9 +132,9 @@
         			}
 
 					var mesh = new THREE.Mesh( geometry, material );
-					mesh.position.x = (2*abscisse.x-1)*SIZE_CONTAINER;
-					mesh.position.y =(2*abscisse.y-1)*SIZE_CONTAINER;
-					mesh.position.z = (2*abscisse.z-1)*SIZE_CONTAINER;
+					mesh.position.x = (2*abscisse.x-1)*SIZE_CONTAINER ;
+					mesh.position.y =(2*abscisse.y-1)*SIZE_CONTAINER ;
+					mesh.position.z = (2*abscisse.z-1)*SIZE_CONTAINER ;
 
 					mesh.matrixAutoUpdate = false;
 					mesh.updateMatrix();
@@ -84,6 +150,7 @@
 
 
 				mesh = new THREE.Mesh(combined, material);
+
 				scene.add( mesh );
 				
 				if(DEBUG){
